@@ -41,5 +41,5 @@ app.register_blueprint(user_bp, url_prefix='/api/users')
 
 
 if __name__ == '__main__':
-    app.debug = True
+    #app.debug = True
     app.run()

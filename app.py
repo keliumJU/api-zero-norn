@@ -21,6 +21,7 @@ migrate = Migrate(app, db, compare_type=True)
 
 
 #Add the admin user 
+"""
 with app.app_context():
     if db.session.query(User).filter_by(username='eliana').count() < 1:
         db.session.add(User(
@@ -29,6 +30,7 @@ with app.app_context():
           roles='admin'
             ))
     db.session.commit()
+"""
 
 @app.route('/api/')
 def index():

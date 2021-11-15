@@ -175,11 +175,11 @@ def login():
     user = guard.authenticate(username, password)
 
     ret={'access_token': guard.encode_jwt_token(user)}
-    if(ret):
-        user_find=User.find_by_username(username=username)
-        add_token=User.add_token_fcm(id=user_find.id, token_fcm=token_fcm)
-        if(add_token):
-            return ret, 200
+
+    user_find=User.find_by_username(username=username)
+    add_token=User.add_token_fcm(id=user_find.id, token_fcm=token_fcm)
+
+    return ret, 200
 
 def refresh():
     print("refresh request")

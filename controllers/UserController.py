@@ -156,12 +156,12 @@ def get_page():
 def active_user(userId):
     user=User.activate_user(id=userId)
     print("in active endpoint")
-    if(user.is_active):
+    if(user.is_active and user.token_fcm!=None):
         send_notification_admin(user.token_fcm, "Cuenta activada", "Tu cuenta ha sido reconocida por el instituto. Ahora puedes iniciar sesion")
-    else:
+    elif (user.is_active==False and user.token_fcm!=None):
         send_notification_admin(user.token_fcm, "Cuenta Inactiva", "Tu cuenta ha sido desactivada por el instituto. Ahora no puedes iniciar sesion")
 
-    return {'message': f'protected endpoint (allowed user {flask_praetorian.current_user()})'}
+    return {'message': f'protected endpoint (allowed user {flask_praetorian.current_user().username})'}
 
 def login():
     req = request.get_json(force=True)

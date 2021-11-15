@@ -151,20 +151,15 @@ def get_page():
     return jsonify([User.json(user) for user in page])
 
 #admin
+@flask_praetorian.roles_required('admin')
 def active_user(userId):
     user=User.activate_user(id=userId)
     print("in active endpoint")
-    if(user):
-        print("user_active")
-        print(user)
-        print(user.token_fcm)
-        if(user.is_active):
-            send_notification_admin(user.token_fcm, "Cuenta activada", "Tu cuenta ha sido reconocida por el instituto. Ahora puedes iniciar sesion")
-        else:
-            send_notification_admin(user.token_fcm, "Cuenta Inactiva", "Tu cuenta ha sido desactivada por el instituto. Ahora no puedes iniciar sesion")
-        return {"msg":"Usuario activado correctamente"},200
+    if(user.is_active):
+        send_notification_admin(user.token_fcm, "Cuenta activada", "Tu cuenta ha sido reconocida por el instituto. Ahora puedes iniciar sesion")
     else:
-        return {"msg":"Sucedio un error al activar el usuario"}, 400
+        send_notification_admin(user.token_fcm, "Cuenta Inactiva", "Tu cuenta ha sido desactivada por el instituto. Ahora no puedes iniciar sesion")
+    
 
 def login():
     req = request.get_json(force=True)

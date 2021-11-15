@@ -1,5 +1,5 @@
 import sys
-from flask import request, make_response, jsonify
+from flask import json, request, make_response, jsonify
 from models.User import User
 from store.jwt_init import guard, flask_praetorian
 
@@ -40,10 +40,10 @@ def store():
     file=request.files.get('img',None)
 
     if(User.find_by_username(username)):
-        return {"error":"El nombre de usuario ya existe"}, 400
+        return make_response(jsonify({"error":"El nombre de usuario ya existe"}), 400)
     if(User.find_by_email(email)):
         print(email)
-        return {"error":"El correo electronico ya existe"}, 400
+        return make_response(jsonify({"error":"El correo electronico ya existe"}), 400)
 
     if(file):
         filename = secure_filename(file.filename)
@@ -75,17 +75,16 @@ def store():
         print("this is the token of eliana")
         print(user_admin.token_fcm)
         send_notification_admin(user_admin.token_fcm, "Registro", "Se ha registrado un nuevo usuario a la base de datos... revisalo pls")
-        return {"msg":"Usuario creado satisfactoriamente"}, 200
+        return make_response(jsonify({"msg":"Usuario creado satisfactoriamente"}), 200)
     else:
-        return {"error":"Se produjo un error al crear el usuario"}, 400
-
+        return make_response(jsonify({"error":"Se produjo un error al crear el usuario"}), 400)
 
 def show(userId):
     user=User.get(userId)
     if(user):
-        return {"user": User.json(user)},200
+        return make_response(jsonify({"user": User.json(user)},200))
     else:
-        return {"msg":"Sucedio un error al mostrar el usuario"},400
+        return make_response(jsonify({"msg":"Sucedio un error al mostrar el usuario"},400))
 
 #Profile
 def update(userId):
@@ -99,9 +98,9 @@ def update(userId):
     user_old = User.get(userId)
 
     if(user_old.username!=username and User.find_by_username(username)):
-        return {"error":"El nombre de usuario ya existe"}, 400
+        return make_response(jsonify({"error":"El nombre de usuario ya existe"}), 400)
     if(user_old.email!=email and User.find_by_email(email)):
-        return {"error":"El correo electronico ya existe"}, 400
+        return make_response(jsonify({"error":"El correo electronico ya existe"}, 400))
 
     if(file):
         filename = secure_filename(file.filename)
@@ -111,10 +110,8 @@ def update(userId):
         img_url=user_old.img
 
     if(user_old.password!=password):
-        print("new password: -->" + password)
         new_password=guard.hash_password(password)
     else:
-        print("old password: -->" + password)
         new_password=password
 
     user = User.update(
@@ -127,20 +124,20 @@ def update(userId):
         roles=role,
         )
     if(user):
-        return {"msg":"Usuario actualizado satisfactoriamente"}, 200
+        return make_response(jsonify({"msg":"Usuario actualizado satisfactoriamente"}, 200))
     else:
-        return {"error":"Se produjo un error al actualizar el usuario"}, 400
+        return make_response(jsonify({"error":"Se produjo un error al actualizar el usuario"}), 400)
 
 def delete(userId):
     user=User.delete(userId)
     if(user):
-        return {"msg":"Usuario eliminado correctamente"}, 200
+        return make_response(jsonify({"msg":"Usuario eliminado correctamente"}, 200))
     else:
-        return {"msg":"Sucedio un error al eliminar el usuario"}, 400
+        return make_response(jsonify({"msg":"Sucedio un error al eliminar el usuario"}), 400)
 
 
 #Paginado
-@flask_praetorian.roles_required('admin')
+@flask_praetorian.roles_required("admin")
 def get_page():
     req=request.get_json(force=True)
     search=req.get('search', None)
@@ -148,11 +145,10 @@ def get_page():
     end=req.get('end', None)
  
     page=User.get_by_page(search=search, ini=ini, end=end)
-    return jsonify([User.json(user) for user in page])
+    return make_response(jsonify([User.json(user) for user in page]),200)
 
 #admin
-@flask_praetorian.auth_required
-@flask_praetorian.roles_required('admin')
+@flask_praetorian.roles_required("admin")
 def active_user(userId):
     user=User.activate_user(id=userId)
     print("in active endpoint")
@@ -161,7 +157,11 @@ def active_user(userId):
     elif (user.is_active==False and user.token_fcm!=None):
         send_notification_admin(user.token_fcm, "Cuenta Inactiva", "Tu cuenta ha sido desactivada por el instituto. Ahora no puedes iniciar sesion")
 
-    return {'message': f'protected endpoint (allowed user {flask_praetorian.current_user().username})'}
+    return make_response(jsonify(
+        message="protected endpoint (allowed user {})".format(
+            flask_praetorian.current_user().username,
+        )
+    ),200)
 
 def login():
     req = request.get_json(force=True)
@@ -174,21 +174,25 @@ def login():
     ret={'access_token': guard.encode_jwt_token(user)}
 
     user_find=User.find_by_username(username=username)
-    add_token=User.add_token_fcm(id=user_find.id, token_fcm=token_fcm)
+    User.add_token_fcm(id=user_find.id, token_fcm=token_fcm)
 
-    return ret, 200
+    return make_response(jsonify(ret), 200)
 
 def refresh():
     print("refresh request")
     old_token=request.get_data()
     new_token=guard.refresh_jwt_token(old_token)
     ret={'access_token':new_token}
-    return ret, 200
+    return make_response(jsonify(ret), 200)
 
 
 @flask_praetorian.auth_required
 def protected():
-    return {'message': f'protected endpoint (allowed user {flask_praetorian.current_user().username})'}
+    return make_response(jsonify(
+        message="protected endpoint (allowed user {})".format(
+            flask_praetorian.current_user().username,
+        )
+    ),200)
 
 
 

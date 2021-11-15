@@ -6,19 +6,19 @@ from store.jwt_init import guard
 from store.app_store import app
 import flask_cors
 
-cors=flask_cors.CORS()
+from flask import jsonify, make_response
 
+cors=flask_cors.CORS()
 
 app.config.from_object('config')
 
-db.init_app(app)
-
 guard.init_app(app, User)
+
+db.init_app(app)
 
 cors.init_app(app)
 
 migrate = Migrate(app, db, compare_type=True)
-
 
 #Add the admin user 
 """
@@ -32,16 +32,17 @@ with app.app_context():
     db.session.commit()
 """
 
-@app.route('/api/')
+@app.route('/')
 def index():
-  return {"Hello": "World"}, 200
+  return make_response(
+    jsonify({"Hello": "World"}),
+    200)
 
 
 app.register_blueprint(user_bp, url_prefix='/api/users')
 
 
 
-
 if __name__ == '__main__':
-    #app.debug = True
+    app.debug = True
     app.run()

@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 import os
 from store.app_store import app
 
-BASE_URL="http://127.0.0.1:5000/"
+BASE_URL="https://api-zero-norn.herokuapp.com/"
 
 #Notification config
 from pyfcm import FCMNotification

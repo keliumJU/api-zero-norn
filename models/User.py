@@ -8,8 +8,6 @@ class User(db.Model):
     username = db.Column(db.String(100), unique=True)
     password = db.Column(db.Text())
     email = db.Column(db.String(100), unique=True, default=True, server_default='example@gmail.com')
-    name = db.Column(db.String(100))
-    img = db.Column(db.Text())
     roles = db.Column(db.Text())
     is_active = db.Column(db.Boolean(), default=True, server_default='0')
     token_fcm = db.Column(db.Text()) 
@@ -20,7 +18,7 @@ class User(db.Model):
         return {
             'id':self.id, 'username':self.username,
             'password':self.password, 'email':self.email,
-            'name':self.name, 'img':self.img ,'roles':self.roles, 'is_active':self.is_active,
+            'roles':self.roles, 'is_active':self.is_active,
             'token_fcm':self.token_fcm 
         }
 
@@ -47,13 +45,11 @@ class User(db.Model):
         return self.is_active
         
     @classmethod 
-    def save(self, username, password, email, name, img, roles, is_active, token_fcm):
+    def save(self, username, password, email, roles, is_active, token_fcm):
         new_user=User(
             username=username,
             password=password,
             email=email,
-            name=name,
-            img=img,
             roles=roles,
             is_active=is_active,
             token_fcm=token_fcm
@@ -65,6 +61,11 @@ class User(db.Model):
     @classmethod 
     def find_by_username(self, username):
         user = User.query.filter_by(username=username).first()
+        return user 
+
+    @classmethod 
+    def find_by_id(self, id):
+        user = User.query.filter_by(id=id).first()
         return user 
     
     @classmethod 
@@ -89,13 +90,11 @@ class User(db.Model):
 
     #profile
     @classmethod
-    def update(self, id, username, password, email, name, img, roles):
+    def update(self, id, username, password, email, roles):
         user = User.query.filter_by(id=id).first()
-        user.img=img
         user.username=username
         user.passowrd=password
         user.email=email
-        user.name=name
         user.roles=roles
         db.session.commit()
         return user
@@ -129,3 +128,11 @@ class User(db.Model):
         user.token_fcm=token_fcm
         db.session.commit()
         return user
+
+    @classmethod
+    def get_tokens_by_list_ids(self, list_ids):
+        list_of_tokens=[]
+        for id_ in list_ids:
+            user=User.query.filter_by(id=id_).first()
+            list_of_tokens.append(user.token_fcm)
+        return list_of_tokens

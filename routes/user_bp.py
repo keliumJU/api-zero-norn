@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from controllers.UserController import index, store, show, update, delete, login, refresh, protected, get_page, active_user
+from controllers.UserController import index, store, show, update, delete, login, refresh, protected, get_page, active_user, logout_msg
 
 user_bp = Blueprint('user_bp', __name__)
 user_bp.route('/', methods=['GET'])(index)
@@ -11,6 +11,7 @@ user_bp.route('/<int:userId>', methods=['DELETE'])(delete)
 
 #Auth user
 user_bp.route('/login', methods=['POST'])(login)
+user_bp.route('/logout', methods=['POST'])(logout_msg)
 user_bp.route('/refresh', methods=['POST'])(refresh)
 user_bp.route('/protected', methods=['GET'])(protected)
 

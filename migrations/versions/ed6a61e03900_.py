@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 3eb119a924ca
+Revision ID: ed6a61e03900
 Revises: 
-Create Date: 2021-10-30 13:54:13.522544
+Create Date: 2021-11-17 16:06:05.765986
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '3eb119a924ca'
+revision = 'ed6a61e03900'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,14 +21,15 @@ def upgrade():
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=100), nullable=True),
-    sa.Column('password', sa.String(length=100), nullable=True),
+    sa.Column('password', sa.Text(), nullable=True),
     sa.Column('email', sa.String(length=100), server_default='example@gmail.com', nullable=True),
     sa.Column('name', sa.String(length=100), nullable=True),
-    sa.Column('lastName', sa.String(length=100), nullable=True),
     sa.Column('img', sa.Text(), nullable=True),
     sa.Column('roles', sa.Text(), nullable=True),
     sa.Column('is_active', sa.Boolean(), server_default='0', nullable=True),
+    sa.Column('token_fcm', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
     # ### end Alembic commands ###
